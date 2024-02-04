@@ -129,7 +129,7 @@ function sys_inf_install {
         Write-Host "SystemInformer installation failed!"
     }
 }
-function UXTU_install {
+function uxtu_install {
     #Universal x86 Tuning Utility installation
     Write-Host "Downloading UXTU and its dependencies..."
     $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/JamesCJ60/Universal-x86-Tuning-Utility/releases/latest"
@@ -137,7 +137,7 @@ function UXTU_install {
         $version_uxtu = $Matches[0]
     }
     $url_uxtu = $releaseInfo.assets | Where-Object { $_.name -like "*Universal.x86.Tuning.Utility*.msi" } | Select-Object -ExpandProperty browser_download_url
-    Write-Host $url_uxtu
+    # Write-Host $url_uxtu
     $output_uxtu = "$env:Temp\Universal.x86.Tuning.Utility.msi"
     Invoke-WebRequest -Uri $url_uxtu -OutFile $output_uxtu
     Destroy "Universal x86 Tuning Utility"
@@ -149,7 +149,7 @@ function UXTU_install {
         Write-Host "Configuring UXTU..."
         $uxtu_source = ".\UXTU"
         $uxtu_user = Join-Path $env:LOCALAPPDATA "JamesCJ60\Universal_x86_Tuning_Util_Url_iimytrsuzb5xtek5eydxvq1ggdurydrv" $version_uxtu "user.config"
-        if(!(Test-Path $uxtu_user)){
+        if (!(Test-Path $uxtu_user)) {
             New-Item -Path $uxtu_user -Force
         }
         Copy-Item -Path (Join-Path $uxtu_source "user.config") -Destination $uxtu_user -Force
@@ -159,7 +159,45 @@ function UXTU_install {
         Write-Host "Universal x86 Tuning Utility istallation failed!"
     }
 }
+function msedge {
+    Destroy "msedge"
+    Get-AppxPackage *MicrosoftEdge* | Remove-AppxPackage
+    Get-Appxpackage -AllUsers | Where-Object { $_.Name -like "*MicrosoftEdge*" } | Select Name | Remove-AppxPackage
+    Get-AppxPackage -AllUsers | Where-Object { $_.PackageFullName -eq "<PackageFullName>" } | Remove-APPxPackage
+
+}
+function onedrive_remove {
+    #OneDrive remove
+    Write-Host "Removing OneDrive..."
+    taskkill.exe /F /IM "OneDrive.exe"
+    taskkill.exe /F /IM "explorer.exe"
+    if (Test-Path "$env:SYSTEMROOT\System32\OneDriveSetup.exe") {
+        & "$env:SYSTEMROOT\System32\OneDriveSetup.exe" /uninstall
+    }
+    if (Test-Path "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe") {
+        & "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe" /uninstall
+    }
+    Remove-Item "$env:LOCALAPPDATA\Microsoft\OneDrive" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item "$env:PROGRAMDATA\Microsoft OneDrive" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item "$env:SYSTEMDRIVE\OneDriveTemp" -Recurse -Force -ErrorAction SilentlyContinue
+    if ((Get-ChildItem "$env:USERPROFILE\OneDrive" -Recurse | Measure-Object).Count -eq 0) {
+        Remove-Item "$env:USERPROFILE\OneDrive" -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Value 1
+    New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Name "HKCR"
+    New-Item -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Name "System.IsPinnedToNameSpaceTree" -Value 0
+    New-Item -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Name "System.IsPinnedToNameSpaceTree" -Value 0
+    Remove-PSDrive "HKCR"
+    Remove-Item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk" -Force -ErrorAction SilentlyContinue
+    Write-Host "OneDrive Removed!"
+    Start-Process "explorer.exe"
+}
 winget_install
 memreduct_install
 sys_inf_install
-UXTU_install
+uxtu_install
+# msedge
+onedrive_remove
