@@ -132,11 +132,11 @@ function sys_inf_install {
 function uxtu_install {
     #Universal x86 Tuning Utility installation
     Write-Host "Downloading UXTU and its dependencies..."
-    $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/JamesCJ60/Universal-x86-Tuning-Utility/releases/latest"
-    if ($releaseInfo -match '\d+\.\d+\.\d+') {
+    $release_info = Invoke-RestMethod -Uri "https://api.github.com/repos/JamesCJ60/Universal-x86-Tuning-Utility/releases/latest"
+    if ($release_info -match '\d+\.\d+\.\d+') {
         $version_uxtu = $Matches[0]
     }
-    $url_uxtu = $releaseInfo.assets | Where-Object { $_.name -like "*Universal.x86.Tuning.Utility*.msi" } | Select-Object -ExpandProperty browser_download_url
+    $url_uxtu = $release_info.assets | Where-Object { $_.name -like "*Universal.x86.Tuning.Utility*.msi" } | Select-Object -ExpandProperty browser_download_url
     # Write-Host $url_uxtu
     $output_uxtu = "$env:Temp\Universal.x86.Tuning.Utility.msi"
     Invoke-WebRequest -Uri $url_uxtu -OutFile $output_uxtu
@@ -146,7 +146,7 @@ function uxtu_install {
     if (IsInstalled "JamesCJ60\Universal x86 Tuning Utility\Universal x86 Tuning Utility.exe") {
         Write-host "Universal x86 Tuning Utility installation successful!" 
         #Configure Universal x86 Tuning Utility 
-        Write-Host "Configuring UXTU..."
+        Write-Host "Configurating UXTU..."
         $uxtu_source = ".\UXTU"
         $uxtu_user = Join-Path $env:LOCALAPPDATA "JamesCJ60\Universal_x86_Tuning_Util_Url_iimytrsuzb5xtek5eydxvq1ggdurydrv" $version_uxtu "user.config"
         if (!(Test-Path $uxtu_user)) {
@@ -158,6 +158,27 @@ function uxtu_install {
     else {
         Write-Host "Universal x86 Tuning Utility istallation failed!"
     }
+}
+function traffic_monitor_install {
+    #Traffic Monitor installation
+    Write-Host "Downloading TrafficMonitor and its dependencies..."
+    $release_info = Invoke-RestMethod -Uri "https://api.github.com/repos/zhongyang219/TrafficMonitor/releases/latest"
+    # Write-Host $release_info
+    $url_traffic_monitor = $release_info.assets | Where-Object { $_.name -like "*TrafficMonitor_*_x64_Lite.zip" } | Select-Object -ExpandProperty browser_download_url
+    Write-Host $url_traffic_monitor
+    $output_traffic_monitor = "$env:Temp\TrafficMonitor_X_x64_Lite.zip"
+    Invoke-WebRequest -Uri $url_traffic_monitor -OutFile $output_traffic_monitor
+    $final_folder = "$env:ProgramFiles"
+    Expand-Archive -Path $output_traffic_monitor -DestinationPath $final_folder
+    if ($?) {
+        Write-Host "TrafficMonitor installation successful!"
+    }
+    Destroy "TrafficMonitor"
+    #Configure TrafficMonitor
+    Write-Host "Configurating TrafficMonitor..."
+    Copy-Item -Path ".\TrafMon\config.ini" -Destination (Join-Path $final_folder "\TrafficMonitor\config.ini") -Force
+    Write-Host "Configuration successful!"
+    Start-Process -FilePath "$env:ProgramFiles\TrafficMonitor\TrafficMonitor.exe"
 }
 function msedge {
     Destroy "msedge"
@@ -184,7 +205,10 @@ function onedrive_remove {
         Remove-Item "$env:USERPROFILE\OneDrive" -Recurse -Force -ErrorAction SilentlyContinue
     }
     New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSync" -Value 1
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Value 1
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" -Name "DisableMeteredNetworkFileSync" -Value 0
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\OneDrive" -Name "DisableLibrariesDefaultSaveToOneDrive" -Value 0
     New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Name "HKCR"
     New-Item -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Force -ErrorAction SilentlyContinue
     Set-ItemProperty -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Name "System.IsPinnedToNameSpaceTree" -Value 0
@@ -199,5 +223,6 @@ winget_install
 memreduct_install
 sys_inf_install
 uxtu_install
+traffic_monitor_install
 # msedge
 onedrive_remove
