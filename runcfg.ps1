@@ -84,8 +84,7 @@ TrayActionDc=0
 AlwaysOnTop=true
 IsAllowStandbyListCleanup=true
 [memreduct\window]
-Position=1523,533" 
-        | Out-File -FilePath $memreduct_path -Encoding utf8
+Position=1523,533" | Out-File -FilePath $memreduct_path -Encoding utf8
         Write-Host "Configuration successful!"    
     }
     else {
@@ -123,7 +122,7 @@ function sys_inf_install {
             New-Item -Path $sys_inf_user -Force
         }
         Copy-Item -Path (Join-Path $sys_inf_source "usernotesdb.xml") -Destination $sys_inf_user -Force
-        Write-Host "Configuration successful!"    
+        Write-Host "Configuration successful!"
     }
     else {
         Write-Host "SystemInformer installation failed!"
@@ -153,6 +152,11 @@ function uxtu_install {
             New-Item -Path $uxtu_user -Force
         }
         Copy-Item -Path (Join-Path $uxtu_source "user.config") -Destination $uxtu_user -Force
+        $apu_path = Join-Path $env:ProgramFiles "\JamesCJ60\Universal x86 Tuning Utility"
+        if (!(Test-Path $apu_path)) {
+            New-Item -Path $apu_path -Force
+        }
+        Copy-Item -Path (Join-Path $uxtu_source "apuPresets.json") -Destination $apu_path -Force
         Write-Host "Configuration successful!"
     }
     else {
@@ -215,14 +219,45 @@ function onedrive_remove {
     New-Item -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Force -ErrorAction SilentlyContinue
     Set-ItemProperty -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Name "System.IsPinnedToNameSpaceTree" -Value 0
     Remove-PSDrive "HKCR"
-    Remove-Item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk" -Force -ErrorAction SilentlyContinue
+    Remove-Item "$env:AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk" -Force -ErrorAction SilentlyContinue
     Write-Host "OneDrive Removed!"
     Start-Process "explorer.exe"
 }
-winget_install
-memreduct_install
-sys_inf_install
-uxtu_install
-traffic_monitor_install
+function glazewm_install {
+    #GlazeWM installation
+    Write-Host "Downloading GlazeWM..."
+    $release_info = Invoke-RestMethod -Uri "https://api.github.com/repos/glzr-io/glazewm/releases/latest"
+    $url_glazewm = $release_info.assets | Where-Object { $_.name -like "GlazeWM_x64_*.exe" } | Select-Object -ExpandProperty browser_download_url
+    Write-Host $url_glazewm
+    $output_glazewm = "$env:Temp\GlazeWM_x64.exe"
+    Invoke-WebRequest -Uri $url_glazewm -OutFile $output_glazewm
+    $startup_folder = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+    Move-Item -Path $output_glazewm -Destination $startup_folder -Force
+    if (IsInstalled "$startup_folder\GlazeWM_x64.exe") {
+        Write-Host "GlazeWM installation successful!"
+        #Configure GlazeWM
+        Write-Host "Configurating GlazeWM..."
+        $glaze_config = "$env:USERPROFILE\.glaze-wm"
+        if (!(Test-Path $glaze_config)) {
+            New-Item -Path $glaze_config -ItemType Directory -Force
+        }
+        Copy-Item -Path ".\GlazeWM\config.yaml" -Destination $glaze_config -Force
+        Write-Host "Configuration successful!"
+        Start-Process -FilePath "$startup_folder\GlazeWM_x64.exe"
+    }
+    else {
+        Write-Host "GlazeWM installation failed!"
+    }
+}
+function zebar_install {
+
+}
+
+# winget_install
+# memreduct_install
+# sys_inf_install
+# uxtu_install
+# traffic_monitor_install
 # msedge
-onedrive_remove
+# onedrive_remove
+glazewm_install
