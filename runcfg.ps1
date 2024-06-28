@@ -301,6 +301,94 @@ function powerShell_install {
     Copy-Item -Path ".\PowerShell\myprofile3.omp.json" -Destination $powershell_profile -Force
     Write-Host "Configuration successful!"
 }
+function menu{
+    Clear-Host
+    Write-Host "Please select the software you want to install:"
+    Write-Host "[1] Winget"
+    Write-Host "[2] System Informer"
+    Write-Host "[3] MemReduct"
+    Write-Host "[4] Universal x86 Tuning Utility"
+    Write-Host "[5] Traffic Monitor"
+    Write-Host "[6] GlazeWM"
+    Write-Host "[7] Zebar"
+    Write-Host "[8] PowerShell"
+    Write-Host "[Q] Exit"
+}
+function main{
+    Clear-Host
+    Write-Host "
+    ░█████╗░████████╗████████╗░█████╗░░██████╗░██╗░░░██╗███████╗██████╗░
+    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔═══██╗██║░░░██║██╔════╝██╔══██╗
+    ███████║░░░██║░░░░░░██║░░░███████║██║██╗██║██║░░░██║█████╗░░██████╔╝
+    ██╔══██║░░░██║░░░░░░██║░░░██╔══██║╚██████╔╝██║░░░██║██╔══╝░░██╔══██╗
+    ██║░░██║░░░██║░░░░░░██║░░░██║░░██║░╚═██╔═╝░╚██████╔╝███████╗██║░░██║
+    ╚═╝░░╚═╝░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝░░░╚═╝░░░░╚═════╝░╚══════╝╚═╝░░╚═╝
+    
+    ░██╗░░░░░░░██╗██╗███╗░░██╗██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗
+    ░██║░░██╗░░██║██║████╗░██║██╔══██╗██╔══██╗░██║░░██╗░░██║██╔════╝
+    ░╚██╗████╗██╔╝██║██╔██╗██║██║░░██║██║░░██║░╚██╗████╗██╔╝╚█████╗░
+    ░░████╔═████║░██║██║╚████║██║░░██║██║░░██║░░████╔═████║░░╚═══██╗
+    ░░╚██╔╝░╚██╔╝░██║██║░╚███║██████╔╝╚█████╔╝░░╚██╔╝░╚██╔╝░██████╔╝
+    ░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░░╚════╝░░░░╚═╝░░░╚═╝░░╚═════╝░
+    
+    ██████╗░░█████╗░████████╗███████╗██╗██╗░░░░░███████╗░██████╗
+    ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝██║██║░░░░░██╔════╝██╔════╝
+    ██║░░██║██║░░██║░░░██║░░░█████╗░░██║██║░░░░░█████╗░░╚█████╗░
+    ██║░░██║██║░░██║░░░██║░░░██╔══╝░░██║██║░░░░░██╔══╝░░░╚═══██╗
+    ██████╔╝╚█████╔╝░░░██║░░░██║░░░░░██║███████╗███████╗██████╔╝
+    ╚═════╝░░╚════╝░░░░╚═╝░░░╚═╝░░░░░╚═╝╚══════╝╚══════╝╚═════╝░"
+    pause
+    while ($true){
+        menu
+        $option = Read-Host
+        switch ($option) {
+            "1" {
+                winget_install
+                pause
+                break
+            }
+            '2' {
+                sys_inf_install
+                pause
+                break
+            }
+            '3' {
+                memreduct_install
+                pause
+                break
+            }
+            '4' {
+                uxtu_install
+                pause
+                break
+            }
+            '5' {
+
+                traffic_monitor_install
+                pause
+                break
+            }
+            '6' {
+                glazewm_install
+                pause
+                break
+            }
+            '7' {
+                zebar_install
+                pause
+                break
+            }
+            '8' {
+                powerShell_install
+                pause
+                break
+            }
+            'q' {
+                exit
+            }
+        }
+    }
+}
 # winget_install
 # memreduct_install
 # sys_inf_install
@@ -309,5 +397,6 @@ function powerShell_install {
 # msedge
 # onedrive_remove
 # glazewm_install
-zebar_install
-powerShell_install
+# zebar_install
+# powerShell_install
+main
