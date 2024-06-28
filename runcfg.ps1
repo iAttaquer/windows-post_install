@@ -233,7 +233,7 @@ function glazewm_install {
     Invoke-WebRequest -Uri $url_glazewm -OutFile $output_glazewm
     $startup_folder = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
     Move-Item -Path $output_glazewm -Destination $startup_folder -Force
-    if (IsInstalled "$startup_folder\GlazeWM_x64.exe") {
+    if (!(Test-Path "$startup_folder\GlazeWM_x64.exe")) {
         Write-Host "GlazeWM installation successful!"
         #Configure GlazeWM
         Write-Host "Configurating GlazeWM..."
@@ -250,9 +250,57 @@ function glazewm_install {
     }
 }
 function zebar_install {
-
+    #Zebar installation
+    Write-Host "Downloading Zebar..."
+    $release_info = Invoke-RestMethod -Uri "https://api.github.com/repos/glzr-io/zebar/releases/latest"
+    $url_zebar = $release_info.assets | Where-Object { $_.name -like "Zebar_x64*.msi" } | Select-Object -ExpandProperty browser_download_url
+    Write-Host $url_zebar
+    $output_zebar = "$env:Temp\Zebar_x64.msi"
+    Invoke-WebRequest -Uri $url_zebar -OutFile $output_zebar
+    Start-Process msiexec.exe -ArgumentList "/i $output_zebar /quiet /norestart" -Wait
+    Remove-Item $output_zebar
+    $zebar_istallation = "$env:ProgramFiles\Zebar\Zebar.exe"
+    if (IsInstalled "\Zebar\Zebar.exe") {
+        Write-Host "Zebar installation successful!"
+        #Configure Zebar
+        Write-Host "Configurating Zebar..."
+        $zebar_config = "$env:USERPROFILE\.glzr\zebar"
+        if (!(Test-Path $zebar_config)) {
+            New-Item -Path $zebar_config -ItemType Directory -Force
+        }
+        Copy-Item -Path ".\Zebar\config.yaml" -Destination $zebar_config -Force
+        $start_bat = "$env:ProgramFiles\Zebar\resources\start.bat"
+        $startup_folder = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+        Copy-Item -Path $start_bat -Destination $startup_folder -Force
+        Write-Host "Configuration successful!"
+        Start-Process -FilePath $start_bat
+    }
+    else {
+        Write-Host "Zebar installation failed!"
+    }
 }
-
+function powerShell_install {
+    #Windows Terminal installation
+    Write-Host "PowerShell installation..."
+    winget install Microsoft.WindowsTerminal
+    if ($?) {
+        Write-Host "Windows Terminal installation successful!"
+    }
+    winget install Microsoft.PowerShell
+    if ($?) {
+        Write-Host "PowerShell installation successful!"
+    }
+    winget install JanDeDobbeleer.OhMyPosh -s winget
+    #Configure Windows Terminal
+    Write-Host "Configurating Terminals..."
+    $powershell_profile = "$env:USERPROFILE\Documents\PowerShell"
+    if (!(Test-Path $powershell_profile)) {
+        New-Item -Path $powershell_profile -ItemType Directory -Force
+    }
+    Copy-Item -Path ".\PowerShell\Microsoft.PowerShell_profile.ps1" -Destination $powershell_profile -Force
+    Copy-Item -Path ".\PowerShell\myprofile3.omp.json" -Destination $powershell_profile -Force
+    Write-Host "Configuration successful!"
+}
 # winget_install
 # memreduct_install
 # sys_inf_install
@@ -260,4 +308,6 @@ function zebar_install {
 # traffic_monitor_install
 # msedge
 # onedrive_remove
-glazewm_install
+# glazewm_install
+zebar_install
+powerShell_install
