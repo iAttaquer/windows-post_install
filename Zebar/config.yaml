@@ -29,7 +29,7 @@ window/bar:
   position_y: '{{ self.args.MONITOR_Y }}'
   # Whether to show the window above/below all others.
   # Allowed values: 'always_on_top', 'always_on_bottom', 'normal'.
-  z_order: 'normal'
+  z_order: 'always_on_bottom'
   # Whether the window should be shown in the taskbar.
   show_in_taskbar: false
   # Whether the window should have resize handles.
@@ -43,16 +43,19 @@ window/bar:
   styles: |
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    align-items: center;
-    justify-content: space-between;
     height: 100%;
     color: #ffffffe6;
     font-family: CaskaydiaCove Nerd Font, ui-monospace, monospace;
     font-size: 13px;
     padding: 0;
-    border-bottom: 1px solid #ffffff08;
+    border-bottom: 0px solid #ffffff08;
     .group {
       padding-top: 3px;
+      margin: 0 0 5px 0;
+    }
+    span {
+      display: flex;
+      align-items: center;
     }
 
   group/left:
@@ -61,23 +64,26 @@ window/bar:
       align-items: center;
       flex-direction: row;
       justify-content: left;
-      height: content;
-      width: content;
-      margin: 0 5px 5px 0;
-      .template {
-        margin-left: 8px;
-        padding: 5px 10px 5px 10px;
-        border-radius: 6px;
-        margin-bottom: 0px;
-        background: rgba(26, 34, 42, 0.70);
-      }
       i {
         margin-right: 7px;
       }
+      .i {
+        font-size: 14px;
+      }
+      .template {
+        display: flex;
+        align-items: center;
+        user-select: none;
+        margin: 0 3px 0 3px;
+        padding: 0px 9px 0px 9px;
+        height: 25px;
+        border-radius: 7px;
+        background: #1b2125bb;
+      }
     template/logo:
       styles: |
-        padding: 5px, 10px, 5px, 10px;
         color: #3A86FF;
+        width: 28px;
       template: |
         
 
@@ -112,15 +118,17 @@ window/bar:
       styles: |
         display: flex;
         align-items: center;
-
         .workspace {
-          background: rgba(255, 255, 255, 0.05);
-          margin-right: 4px;
-          width: 20px;
-          height: 20px;
-          color: #ffffffe6;
+          background: rgba(50, 50, 50, 0.7);
+          margin: 3px 2px 0 2px;
+          width: 22px;
+          height: 22px;
+          color: #ffffff;
           border: none;
-          border-radius: 2px;
+          border-radius: 4px;
+        }
+        .workspace:hover {
+          transform: scale(0.9);
         }
       providers: ['glazewm']
       template: |
@@ -133,19 +141,7 @@ window/bar:
       display: flex;
       align-items: center;
       flex-direction: row;
-      justify-content: center;
       justify-self: end;
-      height: content;
-      width: content;
-      margin: 0 5px 5px 0;
-
-      .template {
-        margin-left: 8px;
-        padding: 5px 10px 5px 10px;
-        border-radius: 6px;
-        margin-bottom: 0px;
-        background: rgba(26, 34, 42, 0.70);
-      }
       .medium-usage {
         color: #D1DF4A;
       }
@@ -153,10 +149,21 @@ window/bar:
         color: #FB8C00;
       }
       .extreme-usage {
-        color: #900029;
+        color: #ff3e3e;
       }
-      i {
+      .i {
         margin-right: 7px;
+        font-size: 15px;
+      }
+      .template {
+        display: flex;
+        align-items: center;
+        user-select: none;
+        margin: 0 3px 0 3px;
+        padding: 0px 9px 0px 9px;
+        height: 25px;
+        border-radius: 7px;
+        background: #1b2125bb;
       }
 
     template/cpu:
@@ -165,19 +172,19 @@ window/bar:
         refresh_interval: 2000
       styles: |
         color: #00CC6A;
-        
+        .i {
+          font-size: 17px;
+        }
       template: |
-        <i class="nf nf-md-cpu_64_bit"></i>
-
         <!-- Change the text color if the CPU usage is high. -->
-        @if (cpu.usage > 40) {
-          <span class="medium-usage">{{ Math.round(cpu.usage) }}%</span>
+        @if (cpu.usage > 90) {
+          <span class="extreme-usage"><span class="i">󰻠</span>{{ Math.round(cpu.usage) }}%</span>
         } @else if (cpu.usage > 65) {
-          <span class="high-usage">{{ Math.round(cpu.usage) }}%</span>
-        } @else if (cpu.usage > 95) {
-          <span class="extreme-usage">{{ Math.round(cpu.usage) }}%</span>
+          <span class="high-usage"><span class="i">󰻠</span>{{ Math.round(cpu.usage) }}%</span>
+        } @else if (cpu.usage > 35) {
+          <span class="medium-usage"><span class="i">󰻠</span>{{ Math.round(cpu.usage) }}%</span>
         } @else {
-          <span>{{ Math.round(cpu.usage) }}%</span>
+          <span class="i">󰻠</span>{{ Math.round(cpu.usage) }}%</span>
         }
 
     template/memory:
@@ -186,15 +193,18 @@ window/bar:
         refresh_interval: 3000
       styles: |
         color: #00CC6A;
+        .i {
+          font-size: 15px;
+          margin-right: 9px;
+        }
       template: |
-        <i class="nf nf-fae-chip"></i>
-        @if (memory.usage > 50) {
-          <span class="medium-usage">{{ Math.round(memory.usage) }}%</span>
+        @if (memory.usage > 90) {
+          <span class="extreme-usage"><span class="i"></span>{{ Math.round(memory.usage) }}%</span>
         } @else if (memory.usage > 65) {
-          <span class="high-usage">{{ Math.round(memory.usage) }}%</span>
-        } @else if (memory.usage > 90) {
-          <span class="extreme-usage">{{ Math.round(memory.usage) }}%</span>
-        } @else {{{ Math.round(memory.usage) }}%}
+          <span class="high-usage"><span class="i"></span>{{ Math.round(memory.usage) }}%</span>
+        } @else if (memory.usage > 50) {
+          <span class="medium-usage"><span class="i"></span>{{ Math.round(memory.usage) }}%</span>
+        } @else {<span class="i"></span>{{ Math.round(memory.usage) }}%}
 
     template/battery:
       providers:
@@ -202,23 +212,27 @@ window/bar:
         refresh_interval: 10000
       styles: |
         position: relative;
-
+        color: #00CC6A;
         .charging-icon {
           position: absolute;
           font-size: 11px;
           left: 7px;
           top: 2px;
         }
+        .i {
+          font-size: 15px;
+          margin-right: 10px;
+        }
       template: |
         <!-- Show icon for whether battery is charging. -->
-        @if (battery.isCharging) {<i class="nf nf-md-power_plug charging-icon"></i>}
+        @if (battery.isCharging) {⚡}
 
         <!-- Show icon for how much of the battery is charged. -->
-        @if (battery.chargePercent > 90) {<i class="nf nf-fa-battery_4"></i>}
-        @else if (battery.chargePercent > 70) {<i class="nf nf-fa-battery_3"></i>}
-        @else if (battery.chargePercent > 40) {<i class="nf nf-fa-battery_2"></i>}
-        @else if (battery.chargePercent > 20) {<i class="nf nf-fa-battery_1"></i>}
-        @else {<i class="nf nf-fa-battery_0"></i>}
+        @if (battery.chargePercent > 90) {<span class="i"></span>}
+        @else if (battery.chargePercent > 70) { }
+        @else if (battery.chargePercent > 40) {<span class="i"></span>}
+        @else if (battery.chargePercent > 20) {<span class="i"></span>}
+        @else {<span class="i"></span>}
 
         {{ Math.round(battery.chargePercent) }}%
 
@@ -227,11 +241,11 @@ window/bar:
       styles: |
         color: #29B6F6;
       template: |
-        {{ date.toFormat(date.now, ' H:mm') }}
+        <span class="i"></span>{{ date.toFormat(date.now, 'H:mm') }}
 
     template/date:
       styles: |
         color: #ead89a;
       template: |
-        {{ date.toFormat(date.now, '󰃭 EEE d MMM') }}
+        <span class="i">󰃭</span>{{ date.toFormat(date.now, 'EEE d MMM') }}
 
