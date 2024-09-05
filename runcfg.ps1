@@ -248,6 +248,23 @@ function glazewm_install {
     else {
         Write-Host "GlazeWM installation failed!"
     }
+    if (IsInstalled "\Zebar\Zebar.exe") {
+        #Configure Zebar
+        Write-Host "Configurating Zebar..."
+        $zebar_config = "$env:USERPROFILE\.glzr\zebar"
+        if (!(Test-Path $zebar_config)) {
+            New-Item -Path $zebar_config -ItemType Directory -Force
+        }
+        Copy-Item -Path ".\Zebar\config.yaml" -Destination $zebar_config -Force
+        $start_bat = "$env:ProgramFiles\Zebar\resources\start.bat"
+        $startup_folder = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+        Copy-Item -Path $start_bat -Destination $startup_folder -Force
+        Write-Host "Configuration successful!"
+        Start-Process -FilePath $start_bat
+    }
+    else {
+        Write-Host "Zebar Configuration skipped!"
+    }
 }
 function zebar_install {
     #Zebar installation
@@ -309,7 +326,7 @@ function menu{
     Write-Host "[3] MemReduct"
     Write-Host "[4] Universal x86 Tuning Utility"
     Write-Host "[5] Traffic Monitor"
-    Write-Host "[6] GlazeWM"
+    Write-Host "[6] GlazeWM with Zebar"
     Write-Host "[7] Zebar"
     Write-Host "[8] PowerShell"
     Write-Host "[Q] Exit"

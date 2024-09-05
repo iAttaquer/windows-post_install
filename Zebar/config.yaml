@@ -7,8 +7,6 @@
 # Docs regarding window: https://some-future-docs-link.com
 window/bar:
   providers:
-  - type: 'network'
-    refresh_interval: 2000
   - type: 'self'
   - type: 'glazewm'
   # Width of the window in physical pixels.
@@ -31,17 +29,132 @@ window/bar:
   # for a cheatsheet of available Nerdfonts icons.
   global_styles: |
     @import "https://www.nerdfonts.com/assets/css/webfont.css";
-  # CSS styles to apply to the root element within the window. Using CSS
-  # nesting, we can also target nested elements (e.g. below we set the
-  # color and margin-right of icons).
+
+    @keyframes rubberBand {
+      from { transform: scale3d(1, 1, 1); }
+      30% { transform: scale3d(1.25, 0.75, 1); }
+      40% { transform: scale3d(0.75, 1.25, 1); }
+      50% { transform: scale3d(1.15, 0.85, 1); }
+      65% { transform: scale3d(0.95, 1.05, 1); }
+      75% { transform: scale3d(1.05, 0.95, 1); }
+      to { transform: scale3d(1, 1, 1); }
+    }
+
+    @keyframes tada {
+      from { transform: scale3d(1, 1, 1); }
+      10%, 20% { transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg); }
+      30%, 50%, 70%, 90% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg); }
+      40%, 60%, 80% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg); }
+      to { transform: scale3d(1, 1, 1); }
+    }
+
+    @keyframes flash {
+      from, 50%, to { opacity: 1; }
+      25%, 75% { opacity: 0; }
+    }
+
+    @keyframes pulse-test {
+      from {
+        transform: scale(0);
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+        transform: scale(2);
+      }
+    }
+
+    @keyframes pulse-size {
+      from,
+      20%,
+      53%,
+      to {
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+        transform: translate3d(0, 0, 0);
+      }
+
+      40%,
+      43% {
+        animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+        transform: translate3d(0, -30px, 0) scaleY(1.1);
+      }
+
+      70% {
+        animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+        transform: translate3d(0, -15px, 0) scaleY(1.05);
+      }
+
+      80% {
+        transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+        transform: translate3d(0, 0, 0) scaleY(0.95);
+      }
+
+      90% {
+        transform: translate3d(0, -4px, 0) scaleY(1.02);
+      }
+    }
+
+    @keyframes shine {
+        0%{background-position:0% 100%}
+        100%{}
+    }
+    @keyframes fadeInMoveUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes appear {
+      from {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(0.8);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+    @keyframes anticlockwise {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(-90deg);
+      }
+    }
+    @keyframes clockwise {
+      from {
+        transform: rotate(-90deg);
+      }
+      to {
+        transform: rotate(0deg);
+      }
+    }
   styles: |
+    --color: #00CC6A;
+    --green: #75ea07;
+    --b-yellow: #ebec6c;
+    --yellow: #e0e109;
+    --b-orange: #FB8C00;
+    --orange: #ec6f08;
+    --b-red: #ff3e3e;
+    --red: #db1e1d
+    --purple: #be70fa;
+    --blue: #05e7e5;
+    --night-blue: #016ff6;
+    --windows-color: #3A86FF;
+
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    color: #ffffffe6;
-    font-family: CaskaydiaCove Nerd Font, monospace;
+    color: #fff;
+    font-family: CaskaydiaMono Nerd Font;
     font-size: 13px;
     height: 32px;
-    # background: #1c1c1cea;
     background: #1c1c1c;
     .group {
       padding: 0 0 6px 0;
@@ -51,18 +164,16 @@ window/bar:
       align-items: center;
     }
     .low-usage {
-      color: #75ea07;
+      color: var(--green);
     }
     .medium-usage {
-      color: #e0e109;
+      color: var(--yellow);
     }
     .high-usage {
-      # color: #FB8C00;
-      color: #ec6f08;
+      color: var(--orange);
     }
     .extreme-usage {
-      color: #ff3e3e;
-      # color: #db1e1d;
+      color: var(--b-red);
     }
     .i {
       margin-right: 7px;
@@ -72,7 +183,7 @@ window/bar:
       display: flex;
       align-items: center;
       user-select: none;
-      margin: 0 4px 0 4px;
+      margin: 0 2px 0 2px;
       height: 100%;
     }
     button {
@@ -80,15 +191,14 @@ window/bar:
       align-items: center;
       text-shadow: 0 0 2px black;
       margin: 0 1px 0 0;
-      height: 20px;
-      color: #ffffff;
-      border: 1px solid transparent;
+      height: 22px;
+      color: #fff;
+      border: none;
       background: none;
       border-radius: 4px;
     }
     button:hover {
-      # border: 1px solid #00000005;
-      background: #aeaeae33;
+      background: #aeaeae55;
       box-shadow: 0 -1px 1px #9e9e9e44,
                   0 1px 1px #24242455;
     }
@@ -96,7 +206,10 @@ window/bar:
   group/left:
     styles: |
       display: flex;
+      align-items: center;
+      justify-content: left;
       padding-left: 2px;
+      # height: 100%;
       i {
         margin-right: 4px;
         # margin-left: 0;
@@ -106,7 +219,7 @@ window/bar:
       }
     template/logo:
       styles: |
-        color: #3A86FF;
+        color: var(--windows-color);
         padding-left: 5px;
         font-size: 15px;
         width: 25px;
@@ -114,68 +227,287 @@ window/bar:
         <!-- Windows Logo -->
         
 
+    template/glazewm:
+      styles: |
+        .workspace {
+          width: 24px;
+          justify-content: center;
+          # transition: transform 0.2s ease;
+        }
+        .workspace-content{
+          display: inline-block;
+          pointer-events: none;
+        }
+        .workspace:active .workspace-content {
+          # animation: appear 0.2s ease;
+        }
+        .displayed {
+          background: #aeaeae33;
+          box-shadow: 0 -1px 1px #9e9e9e44,
+                      0 1px 1px #24242455;
+        }
+        .focused {
+          span{
+            animation: appear 0.2s ease;
+          }
+        }
+        # { /* spotify */
+          span{
+            text-indent: -5px;
+          }
+        }
+        # { /* discord */
+          span{
+            text-indent: -7px;
+            font-size: 12px;
+          }
+        }
+        # { /* brave */
+          span{
+            font-size: 13px;
+            text-indent: -5px;
+          }
+        }
+
+      events:
+        - type: 'click'
+          fn_path: 'script.js#focusWorkspace'
+          selector: '.workspace'
+      template: |
+        @for (workspace of glazewm.currentWorkspaces) {
+          <button
+            class="workspace {{ workspace.hasFocus ? 'focused' : '' }} {{ workspace.isDisplayed ? 'displayed' : '' }}"
+            id="{{ workspace.name }}"
+          >
+          <span class="workspace-content">
+            {{ workspace.displayName ?? workspace.name }}
+          </span>
+          </button>
+        }
+
+    template/tiling_direction:
+      styles: |
+        button {
+          width: 24px;
+          justify-content: center;
+        }
+        .tiling-direction {
+          text-indent: -2px;
+          font-size: 13px;
+        }
+        .horizontal {
+          animation: clockwise 0.2s ease-in-out forwards;
+        }
+        .vertical {
+          animation: anticlockwise 0.2s ease-in-out forwards;
+        }
+
+      template: |
+        <button>
+          <span class="tiling-direction 
+            @if (glazewm.tilingDirection === 'horizontal') {horizontal}
+            @else {vertical}">
+              
+          </span>
+        </button>
+
+    template/binding_mode:
+      styles: |
+        .binding-mode {
+          text-shadow: 0 0 2px black;
+          padding: 4px 6px;
+          margin: 0;
+        }
+
+      template: |
+        @for (bindingMode of glazewm.bindingModes) {
+          <span class="binding-mode">
+            {{ bindingMode.displayName ?? bindingMode.name }}
+          </span>
+        }
+
+  group/center:
+    styles: |
+      justify-self: center;
+      display: flex;
+      flex-direction: row;
+
+    template/glazewm_current_window:
+      styles: |
+        .current-window {
+          color: white;
+          white-space: nowrap;
+          max-width: 700px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      template: |
+        @if (glazewm.focusedContainer?.type === 'window') {
+          <span class="current-window">
+            {{ glazewm.focusedContainer.title.length > 90 ? glazewm.focusedContainer.title.slice(0, 90) + '...' : glazewm.focusedContainer.title }}
+          </span>
+        } @else {
+          <span>Desktop</span>
+        }
+
+  group/right:
+    styles: |
+      display: flex;
+      justify-self: end;
+      .i {
+        margin-right: 7px;
+        font-size: 15px;
+      }
     template/cpu:
       providers:
       - type: 'cpu'
         refresh_interval: 2000
       styles: |
-        button{
-          # color: #00CC6A;
-          # color: #75ea07;
-          # color: #be70fa;
-          # color: #016ff6;
-        }
         .i {
           font-size: 17px;
+          width: 8px;
         }
+        display: flex;
+        align-items: center;
+        position: relative;
+        /*&:hover {
+          .cpu-bar {
+            transform: translateY(200%);
+            opacity: 0;
+          }
+          .labels {
+            transform: translateY(0%);
+            opacity: 1;
+          }
+        }*/
+        .cpu-bar {
+          display: inline-block;
+          align-items: center;
+          text-align: center;
+          height: 100%;
+          width: 2rem;
+          /*opacity: 1;
+          transform: translateY(0%);
+          transition: transform 0.3s ease, opacity 0.3s ease;*/
+        }
+        /*.labels {
+          position: absolute;
+          right: 0;
+          display: flex;
+          flex-direction: column;
+          opacity: 0;
+          transform: translateY(-100%);
+          transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .label {
+          display: flex;
+          gap: 3px;
+          justify-content: space-between;
+          font-size: 8px;
+          span {
+          }
+        }*/
       template: |
         <!-- Change the text color if the CPU usage is high. -->
-        @if (cpu.usage > 90) {
-          <span class="extreme-usage"><span class="i">󰻠</span>{{ Math.round(cpu.usage) }}%</span>
-        } @else if (cpu.usage > 65) {
-          <span class="high-usage"><span class="i">󰻠</span>{{ Math.round(cpu.usage) }}%</span>
-        } @else if (cpu.usage > 35) {
-          <span class="medium-usage"><span class="i">󰻠</span>{{ Math.round(cpu.usage) }}%</span>
-        } @else {
-          <span class="low-usage"><span class="i">󰻠</span>{{ Math.round(cpu.usage) }}%</span>
-        }
+        <span class="
+          @if (cpu.usage > 90) {extreme-usage}
+          @else if (cpu.usage > 65) {high-usage}
+          @else if (cpu.usage > 35) {medium-usage}
+          @else {low-usage}">
+          <span class="i">󰻠</span>
+          <!--<div class="labels">
+            <span class="label cores">
+              <span>PHY</span>
+              {{ cpu.physicalCoreCount }}C
+            </span>
+            <span class="label threads">
+              <span>LOG</span>
+              {{ cpu.logicalCoreCount }}T
+            </span>
+          </div>-->
+          <span class="cpu-bar">{{ Math.round(cpu.usage) }}%</span>
+        </span>
 
     template/memory:
       providers:
       - type: 'memory'
         refresh_interval: 4000
       styles: |
-        button{
-        }
+        display: flex;
+        align-items: center;
+        position: relative;
         .i {
-          margin-right: 8px;
+          width: 14px;
         }
-      template: |
-        @if (memory.usage > 90) {
-          <span class="extreme-usage"><span class="i"></span>{{ Math.round(memory.usage) }}%</span>
-        } @else if (memory.usage > 65) {
-          <span class="high-usage"><span class="i"></span>{{ Math.round(memory.usage) }}%</span>
-        } @else if (memory.usage > 50) {
-          <span class="medium-usage"><span class="i"></span>{{ Math.round(memory.usage) }}%</span>
-        } @else {<span class="low-usage"><span class="i"></span>{{ Math.round(memory.usage) }}%</span>}
+        &:hover {
+          .mem-bar {
+            transform: translateY(200%);
+            opacity: 0;
+          }
+          .labels {
+            transform: translateY(0%);
+            opacity: 1;
+          }
+        }
+        .mem-bar {
+          display: inline-block;
+          align-items: center;
+          text-align: center;
+          height: 100%;
+          width: 2rem;
+          overflow: hidden;
+          opacity: 1;
+          transform: translateY(0%);
+          transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .labels {
+          position: absolute;
+          right: 0;
+          display: flex;
+          flex-direction: column;
+          opacity: 0;
+          transform: translateY(-100%);
+          transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .label {
+          display: flex;
+          gap: 3px;
+          justify-content: space-between;
+          font-size: 8px;
+          span {
+          }
+        }
 
-    template/netspeed:
-      providers:
-      - type: 'util'
       template: |
-        <span style="color: #05e7e5;">
-        <span class="i" style="font-size: 13px; margin: 0 4px 0 4px;"></span>
-        {{ util.convertBytes(network.traffic.received, 2, 'si_bytes') }}
-        <span class="i" style="font-size: 13px; margin: 0 4px 0 4px;"></span>
-        {{ util.convertBytes(network.traffic.transmitted, 2, 'si_bytes') }}
+        <span class="
+          @if (memory.usage > 90) {extreme-usage}
+          @else if (memory.usage > 65) {high-usage}
+          @else if (memory.usage > 45) {medium-usage}
+          @else {low-usage}">
+          <span class="i"></span>
+            <div class="labels">
+              <span class="label total">
+                <span>USED</span>
+                {{ Math.round(memory.usedMemory / 1024 / 1024 / 1024) }}G
+              </span>
+              <span class="label total">
+                <span>TOT</span>
+                {{ Math.round(memory.totalMemory / 1024 / 1024 / 1024) }}G
+              </span>
+            </div>
+            <span class="mem-bar"> {{Math.round(memory.usage)}}%</span>
         </span>
+
     template/weather:
       providers:
       - type: 'weather'
         latitude: 50.03
         longitude: 21.98
       styles: |
-        color: #ebec6c;
+        color: var(--b-yellow);
+        i{
+         font-size: 16px;
+        }
       template: |
         @switch (weather.status) {
           @case ('clear_day') {<i class="nf nf-weather-day_sunny"></i>}
@@ -191,115 +523,177 @@ window/bar:
           @case ('thunder_day') {<i class="nf nf-weather-day_lightning"></i>}
           @case ('thunder_night') {<i class="nf nf-weather-night_alt_lightning"></i>}
         }
-        {{ Math.round(weather.celsiusTemp) }}°C
-    template/glazewm_other:
+        {{ Math.round(weather.celsiusTemp) }}°C 
+    template/network:
+      providers:
+      - type: 'network'
+        refresh_interval: 2000
+      - type: 'util'
       styles: |
-        .binding-mode,
-        .tiling-direction {
-          text-shadow: 0 0 2px black;
-          padding: 4px 6px;
-          margin: 0;
+        display: flex;
+        align-items: center;
+        position: relative;
+        color: var(--night-blue);
+        .ii{
+          font-size: 6px;
+          width: 0;
         }
-
-      template: |
-        @if (glazewm.tilingDirection === 'horizontal') {
-          <i class="tiling-direction nf nf-md-swap_horizontal"></i>
-        } @else {
-          <i class="tiling-direction nf nf-md-swap_vertical"></i>
+        .wifi {
+          font-size: 14px;
+          width: 20px;
         }
-        @for (bindingMode of glazewm.bindingModes) {
-          <span class="binding-mode">
-            {{ bindingMode.displayName ?? bindingMode.name }}
-          </span>
+        white-space: nowrap;
+        width: 6.3rem;
+        .labels {
+          color: var(--blue);
+          position: absolute;
+          right: 0;
+          width: 3.1rem;
+          display: flex;
+          flex-direction: column;
         }
-
-  group/center:
-    styles: |
-      justify-self: center;
-    template/glazewm:
-      styles: |
-        .workspace {
-          width: 22px;
-        }
-          # &.displayed {
-          #   background: rgb(255 255 255 / 15%);
-          # }
-          &.focused,
-          &:hover {
-            # border: 1px solid #00000005;
-            background: #aeaeae33;
-            # box-shadow: 0 -1px 1px #9e9e9e44,
-            #             0 1px 1px #24242455;
+        .label {
+          display: flex;
+          gap: 3px;
+          justify-content: space-between;
+          font-size: 8px;
+          span {
           }
         }
-      events:
-        - type: 'click'
-          fn_path: 'script.js#focusWorkspace'
-          selector: '.workspace'
-      template: |
-        @for (workspace of glazewm.currentWorkspaces) {
-          <button
-            class="workspace {{ workspace.hasFocus ? 'focused' : '' }} {{ workspace.isDisplayed ? 'displayed' : '' }}"
-            id="{{ workspace.name }}"
-          >
-            {{ workspace.displayName ?? workspace.name }}
-          </button>
+        .net-line {
+          width: 2.6rem;
+          justify-content: end;
+          # border: 1px solid white;
         }
-
-  group/right:
-    styles: |
-      display: flex;
-      justify-self: end;
-      .i {
-        margin-right: 7px;
-        font-size: 15px;
-      }
-    template/network:
       template: |
-        <!-- Show icon based on signal strength. -->
-        <span style="color: #016ff6;">
+        <span>
         @if (network.defaultInterface?.type === 'ethernet') {
           <span class="i">󰈁</span>
         } @else if (network.defaultInterface?.type === 'wifi') {
-          @if (network.defaultGateway?.signalStrength >= 1) {<span class="i">󰖩</span>{{ network.defaultGateway?.signalStrength }}%}
-          @else {<span class="i">󰖪</span>0%}
+          @if (network.defaultGateway?.signalStrength >= 1) {<span class="wifi"></span>{{ network.defaultGateway?.signalStrength }}%}
+          @else {<span class="i">󱞐</span>0%}
         } @else {
-          <span class="i">󰖪</span>
+          <span class="i">󱞐</span>
         }
         </span>
+        <div class="labels">
+          <span class="label">
+            <span class="ii"></span>
+            <span class="net-line">{{ util.convertBytes(network.traffic.received, 2, 'si_bytes') }}</span>
+          </span>
+          <span class="label">
+            <span class="ii"></span>
+            <span class="net-line">{{ util.convertBytes(network.traffic.transmitted, 2, 'si_bytes') }}</span>
+          </span>
+        </div>
+
     template/battery:
       providers:
       - type: 'battery'
         refresh_interval: 15000
       styles: |
-        position: relative;
-        color: #75ea07;
-        .charging-icon {
-          color: #fdc93e;
-          position: absolute;
-          font-size: 11px;
-          left: 11px;
-          top: 5px;
-          z-index: 99;
-        }
         .i {
-          margin-right: 11px;
+          width: 1px;
+          font-size: 17px;
+        }
+        .battery-bar {
+          display: inline-block;
+          text-align: center;
+          width: 2.3rem;
         }
       template: |
-        <!-- Show icon for whether battery is charging. -->
-        @if (battery.isCharging) {<span class="charging-icon">⚡</span>}
+        <span class="
+          @if (battery.chargePercent > 79.5) {low-usage}
+          @else if (battery.chargePercent >= 50) {medium-usage}
+          @else if (battery.chargePercent >= 25) {high-usage}
+          @else {extreme-usage}
+        ">
+          <span class="i">
+            @if (battery.state === 'charging') {󰂄}
+            @else if (battery === 'discharging') {󰂌}
+            @else {󰁹}
+          </span>
+            <span class="battery-bar">
+              {{ Math.round(battery.chargePercent) }}%
+            </span>
+        </span>
 
-        <!-- Show icon for how much of the battery is charged. -->
-        @if (battery.chargePercent > 90) {<span class="i"></span>}
-        @else if (battery.chargePercent > 70) {<span class="i"></span>}
-        @else if (battery.chargePercent > 40) {<span class="i"></span>}
-        @else if (battery.chargePercent > 20) {<span class="i"></span>}
-        @else {<span class="i"></span>}
-
-        {{ Math.round(battery.chargePercent) }}%
     template/clock:
       providers: ['date']
       # Available date tokens: https://moment.github.io/luxon/#/formatting?id=table-of-tokens
+      styles: |
+        display: flex;
+        align-items: center;
+        position: relative;
+        flex-direction: column;
+        width: 3.5rem;
+        .i {
+          font-size: 13px;
+          width: 10px;
+        }
+        .ii {
+          font-size: 17px;
+          width: 16px;
+        }
+        &:hover {
+          .time-bar {
+            transform: translateY(200%);
+            opacity: 0;
+          }
+          .date-bar {
+            transform: translateY(0%);
+            opacity: 1;
+          }
+        }
+        .date-bar {
+          color: var(--b-yellow);
+          display: flex;
+          align-items: center;
+          text-align: center;
+          position: absolute;
+          height: 100%;
+          # width: 4rem;
+          overflow: hidden;
+          transform: translateY(-100%);
+          opacity: 0;
+          transition: transform 0.3s ease, opacity 0.3s ease;
+          right: 0;
+        }
+        .time-bar {
+          color: var(--blue);
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          text-align: center;
+          height: 100%;
+          opacity: 1;
+          transform: translateY(0%);
+          transition: transform 0.3s ease, opacity 0.3s ease;
+          .time{
+            width: 2.5rem;
+          }
+        }
+        .labels {
+          width: 2.5rem;
+        }
+        .label {
+          white-space: nowrap;
+          display: flex;
+          gap: 3px;
+          justify-content: 5px; #space-between;
+          font-size: 8px;
+          span {
+          }
+        }
       template: |
-        <span style="color: #ebec6c; margin-right: 8px;"> {{ date.toFormat(date.now, ' d/MM/yy') }} </span>
-        <span style="color: #05e7e5;"> {{ date.toFormat(date.now, 'H:mm') }} </span>
+        <span class="date-bar">
+          <span class="ii">󰃭</span>
+          <div class="labels">
+            <span class="label date">{{ date.toFormat(date.now, 'd ccc')}}</span>
+            <span class="label time">{{ date.toFormat(date.now, 'MM yyyy')}}</span>
+          </div>
+        </span>
+        <span class="time-bar">
+          <span class="i"></span>
+          <span class="time">{{ date.toFormat(date.now, 'H:mm') }}</span>
+        </span>
