@@ -95,9 +95,11 @@ function sys_inf_install {
     #System Informer Installation
     Write-Host "Downloading SystemInformer and its dependencies..."
     $tags = Invoke-RestMethod -Uri https://api.github.com/repos/winsiderss/si-builds/tags
-    $latestVersion = $tags[0].name
-    $url_system_informer = "https://github.com/winsiderss/si-builds/releases/download/$latestVersion/systeminformer-$latestVersion-setup.exe"
-    $output_si = "$env:TEMP\systeminformer-$latestVersion-setup.exe"
+    $release_info = Invoke-RestMethod -Uri "https://api.github.com/repos/winsiderss/si-builds/releases/latest"
+    $latest_version = $release_info.tag_name
+    # $url_system_informer = "https://github.com/winsiderss/si-builds/releases/download/$latestVersion/systeminformer-$latestVersion-setup.exe"
+    $url_system_informer = "https://github.com/winsiderss/si-builds/releases/download/$latest_version/systeminformer-$latest_version-canary-setup.exe"
+    $output_si = "$env:TEMP\systeminformer-setup.exe"
     Invoke-WebRequest -Uri $url_system_informer -OutFile $output_si
     Write-Host "After installation make sure to close SystemInformer!"
     Start-Process -FilePath $output_si -ArgumentList "/quiet" -Wait
