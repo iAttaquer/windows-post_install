@@ -229,43 +229,37 @@ function glazewm_install {
     #GlazeWM installation
     Write-Host "Downloading GlazeWM..."
     $release_info = Invoke-RestMethod -Uri "https://api.github.com/repos/glzr-io/glazewm/releases/latest"
-    $url_glazewm = $release_info.assets | Where-Object { $_.name -like "GlazeWM_x64_*.exe" } | Select-Object -ExpandProperty browser_download_url
-    Write-Host $url_glazewm
-    $output_glazewm = "$env:Temp\GlazeWM_x64.exe"
-    Invoke-WebRequest -Uri $url_glazewm -OutFile $output_glazewm
-    $startup_folder = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
-    Move-Item -Path $output_glazewm -Destination $startup_folder -Force
+    $url_glazewm = $release_info.assets | Where-Object { $_.name -like "glazewm-v*.exe" } | Select-Object -ExpandProperty browser_download_url
+    if ($url_glazewm) {
+        $output_glazewm = "$env:Temp\GlazeWM_x64.exe"
+        Invoke-WebRequest -Uri $url_glazewm -OutFile $output_glazewm
+        if (Test-Path $output_glazewm) {
+            Start-Process -FilePath $output_glazewm
+        } else {
+            Write-Host "Failed to download GlazeWM installer."
+        }
+    } else {
+        Write-Host "Failed to retrieve GlazeWM download URL."
+    }
     if (!(Test-Path "$startup_folder\GlazeWM_x64.exe")) {
         Write-Host "GlazeWM installation successful!"
-        #Configure GlazeWM
-        Write-Host "Configurating GlazeWM..."
-        $glaze_config = "$env:USERPROFILE\.glaze-wm"
-        if (!(Test-Path $glaze_config)) {
-            New-Item -Path $glaze_config -ItemType Directory -Force
-        }
-        Copy-Item -Path ".\GlazeWM\config.yaml" -Destination $glaze_config -Force
-        Write-Host "Configuration successful!"
-        Start-Process -FilePath "$startup_folder\GlazeWM_x64.exe"
     }
     else {
         Write-Host "GlazeWM installation failed!"
     }
-    if (IsInstalled "\Zebar\Zebar.exe") {
-        #Configure Zebar
-        Write-Host "Configurating Zebar..."
-        $zebar_config = "$env:USERPROFILE\.glzr\zebar"
-        if (!(Test-Path $zebar_config)) {
-            New-Item -Path $zebar_config -ItemType Directory -Force
-        }
-        Copy-Item -Path ".\Zebar\config.yaml" -Destination $zebar_config -Force
-        $start_bat = "$env:ProgramFiles\Zebar\resources\start.bat"
-        $startup_folder = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
-        Copy-Item -Path $start_bat -Destination $startup_folder -Force
-        Write-Host "Configuration successful!"
-        Start-Process -FilePath $start_bat
+}
+function glazewm_config {
+    Write-Host "Configurating GlazeWM & Zebar..."
+    $registry_path = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    $glzr_conf_directory = "$env:UserProfile\Desktop\glzr"
+    $glaze_dir = "$env:ProgramFiles\glzr.io\GlazeWM\glazewm.exe"
+    git clone https://github.com/iAttaquer/.glzr.git $glzr_conf_directory
+    if (!$?) {
+        Write-Host "Failed to clone GlazeWM configuration!"
     }
-    else {
-        Write-Host "Zebar Configuration skipped!"
+    Set-ItemProperty -Path $registry_path -Name "GlazeWM" -Value $glaze_dir
+    if ($?) {
+        Write-Host "Added GlazeWM to startup!"
     }
 }
 function zebar_install {
@@ -282,17 +276,17 @@ function zebar_install {
     if (IsInstalled "\Zebar\Zebar.exe") {
         Write-Host "Zebar installation successful!"
         #Configure Zebar
-        Write-Host "Configurating Zebar..."
-        $zebar_config = "$env:USERPROFILE\.glzr\zebar"
-        if (!(Test-Path $zebar_config)) {
-            New-Item -Path $zebar_config -ItemType Directory -Force
-        }
-        Copy-Item -Path ".\Zebar\config.yaml" -Destination $zebar_config -Force
-        $start_bat = "$env:ProgramFiles\Zebar\resources\start.bat"
-        $startup_folder = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
-        Copy-Item -Path $start_bat -Destination $startup_folder -Force
-        Write-Host "Configuration successful!"
-        Start-Process -FilePath $start_bat
+        # Write-Host "Configurating Zebar..."
+        # $zebar_config = "$env:USERPROFILE\.glzr\zebar"
+        # if (!(Test-Path $zebar_config)) {
+        #     New-Item -Path $zebar_config -ItemType Directory -Force
+        # }
+        # Copy-Item -Path ".\Zebar\config.yaml" -Destination $zebar_config -Force
+        # $start_bat = "$env:ProgramFiles\Zebar\resources\start.bat"
+        # $startup_folder = "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+        # Copy-Item -Path $start_bat -Destination $startup_folder -Force
+        # Write-Host "Configuration successful!"
+        # Start-Process -FilePath $start_bat
     }
     else {
         Write-Host "Zebar installation failed!"
@@ -323,39 +317,65 @@ function powerShell_install {
 function menu{
     Clear-Host
     Write-Host "Please select the software you want to install:"
+    Start-Sleep -Milliseconds 10
     Write-Host "[1] Winget"
+    Start-Sleep -Milliseconds 10
     Write-Host "[2] System Informer"
+    Start-Sleep -Milliseconds 10
     Write-Host "[3] MemReduct"
+    Start-Sleep -Milliseconds 10
     Write-Host "[4] Universal x86 Tuning Utility"
+    Start-Sleep -Milliseconds 10
     Write-Host "[5] Traffic Monitor"
-    Write-Host "[6] GlazeWM with Zebar"
+    Start-Sleep -Milliseconds 10
+    Write-Host "[6] GlazeWM with Zebar              [9] Config for GlazeWM & Zebar"
+    Start-Sleep -Milliseconds 10
     Write-Host "[7] Zebar"
+    Start-Sleep -Milliseconds 10
     Write-Host "[8] PowerShell"
+    Start-Sleep -Milliseconds 10
     Write-Host "[Q] Exit"
 }
 function main{
     Clear-Host
-    Write-Host "
-    ░█████╗░████████╗████████╗░█████╗░░██████╗░██╗░░░██╗███████╗██████╗░
-    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔═══██╗██║░░░██║██╔════╝██╔══██╗
-    ███████║░░░██║░░░░░░██║░░░███████║██║██╗██║██║░░░██║█████╗░░██████╔╝
-    ██╔══██║░░░██║░░░░░░██║░░░██╔══██║╚██████╔╝██║░░░██║██╔══╝░░██╔══██╗
-    ██║░░██║░░░██║░░░░░░██║░░░██║░░██║░╚═██╔═╝░╚██████╔╝███████╗██║░░██║
-    ╚═╝░░╚═╝░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝░░░╚═╝░░░░╚═════╝░╚══════╝╚═╝░░╚═╝
-    
-    ░██╗░░░░░░░██╗██╗███╗░░██╗██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗
-    ░██║░░██╗░░██║██║████╗░██║██╔══██╗██╔══██╗░██║░░██╗░░██║██╔════╝
-    ░╚██╗████╗██╔╝██║██╔██╗██║██║░░██║██║░░██║░╚██╗████╗██╔╝╚█████╗░
-    ░░████╔═████║░██║██║╚████║██║░░██║██║░░██║░░████╔═████║░░╚═══██╗
-    ░░╚██╔╝░╚██╔╝░██║██║░╚███║██████╔╝╚█████╔╝░░╚██╔╝░╚██╔╝░██████╔╝
-    ░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░░╚════╝░░░░╚═╝░░░╚═╝░░╚═════╝░
-    
-    ██████╗░░█████╗░████████╗███████╗██╗██╗░░░░░███████╗░██████╗
-    ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝██║██║░░░░░██╔════╝██╔════╝
-    ██║░░██║██║░░██║░░░██║░░░█████╗░░██║██║░░░░░█████╗░░╚█████╗░
-    ██║░░██║██║░░██║░░░██║░░░██╔══╝░░██║██║░░░░░██╔══╝░░░╚═══██╗
-    ██████╔╝╚█████╔╝░░░██║░░░██║░░░░░██║███████╗███████╗██████╔╝
-    ╚═════╝░░╚════╝░░░░╚═╝░░░╚═╝░░░░░╚═╝╚══════╝╚══════╝╚═════╝░"
+    Write-Host "    ░█████╗░████████╗████████╗░█████╗░░██████╗░██╗░░░██╗███████╗██████╗░"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔═══██╗██║░░░██║██╔════╝██╔══██╗"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ███████║░░░██║░░░░░░██║░░░███████║██║██╗██║██║░░░██║█████╗░░██████╔╝"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ██╔══██║░░░██║░░░░░░██║░░░██╔══██║╚██████╔╝██║░░░██║██╔══╝░░██╔══██╗"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ██║░░██║░░░██║░░░░░░██║░░░██║░░██║░╚═██╔═╝░╚██████╔╝███████╗██║░░██║"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ╚═╝░░╚═╝░░░╚═╝░░░░░░╚═╝░░░╚═╝░░╚═╝░░░╚═╝░░░░╚═════╝░╚══════╝╚═╝░░╚═╝"
+    Start-Sleep -Milliseconds 10
+    Write-Host ""
+    Write-Host "    ░██╗░░░░░░░██╗██╗███╗░░██╗██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ░██║░░██╗░░██║██║████╗░██║██╔══██╗██╔══██╗░██║░░██╗░░██║██╔════╝"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ░╚██╗████╗██╔╝██║██╔██╗██║██║░░██║██║░░██║░╚██╗████╗██╔╝╚█████╗░"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ░░████╔═████║░██║██║╚████║██║░░██║██║░░██║░░████╔═████║░░╚═══██╗"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ░░╚██╔╝░╚██╔╝░██║██║░╚███║██████╔╝╚█████╔╝░░╚██╔╝░╚██╔╝░██████╔╝"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░░╚════╝░░░░╚═╝░░░╚═╝░░╚═════╝░"
+    Start-Sleep -Milliseconds 10
+    Write-Host ""
+    Write-Host "    ██████╗░░█████╗░████████╗███████╗██╗██╗░░░░░███████╗░██████╗"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝██║██║░░░░░██╔════╝██╔════╝"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ██║░░██║██║░░██║░░░██║░░░█████╗░░██║██║░░░░░█████╗░░╚█████╗░"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ██║░░██║██║░░██║░░░██║░░░██╔══╝░░██║██║░░░░░██╔══╝░░░╚═══██╗"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ██████╔╝╚█████╔╝░░░██║░░░██║░░░░░██║███████╗███████╗██████╔╝"
+    Start-Sleep -Milliseconds 10
+    Write-Host "    ╚═════╝░░╚════╝░░░░╚═╝░░░╚═╝░░░░░╚═╝╚══════╝╚══════╝╚═════╝░"
+    Start-Sleep -Milliseconds 10
     pause
     while ($true){
         menu
@@ -399,6 +419,11 @@ function main{
             }
             '8' {
                 powerShell_install
+                pause
+                break
+            }
+            '9' {
+                glazewm_config
                 pause
                 break
             }
