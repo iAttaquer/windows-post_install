@@ -1,0 +1,100 @@
+// Zed keymap
+
+//
+
+// For information on binding keys, see the Zed
+
+// documentation: https://zed.dev/docs/key-bindings
+
+//
+
+// To see the default key bindings run `zed: open default keymap`
+
+// from the command palette.
+
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      // "shift shift": "file_finder::Toggle"
+      "ctrl-shift-h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-shift-l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-shift-j": ["workspace::ActivatePaneInDirection", "Down"],
+      "ctrl-shift-k": ["workspace::ActivatePaneInDirection", "Up"]
+    }
+  },
+  {
+    "context": "Editor && (showing_code_actions || showing_completions)",
+    "bindings": {
+      "ctrl-k": "editor::ContextMenuPrev",
+      "ctrl-p": "editor::ContextMenuPrev",
+      "ctrl-j": "editor::ContextMenuNext",
+      "ctrl-n": "editor::ContextMenuNext",
+      "pageup": "editor::ContextMenuFirst",
+      "pagedown": "editor::ContextMenuLast"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-shift-l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-shift-j": ["workspace::ActivatePaneInDirection", "Down"],
+      "ctrl-shift-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-s": "workspace::Save",
+      "ctrl-alt-e": ["workspace::SendKeystrokes", "alt-e"],
+      "ctrl-alt-o": ["workspace::SendKeystrokes", "alt-o"],
+      "ctrl-alt-s": ["workspace::SendKeystrokes", "alt-s"],
+      "ctrl-alt-a": ["workspace::SendKeystrokes", "alt-a"],
+      "ctrl-alt-l": ["workspace::SendKeystrokes", "alt-l"],
+      "ctrl-alt-n": ["workspace::SendKeystrokes", "alt-n"],
+      "ctrl-alt-x": ["workspace::SendKeystrokes", "alt-x"],
+      "ctrl-alt-z": ["workspace::SendKeystrokes", "alt-z"],
+      "ctrl-alt-c": ["workspace::SendKeystrokes", "alt-c"]
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-shift-e": "outline_panel::ToggleFocus",
+      "ctrl-shift-b": "project_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "VimControl && !menu",
+    "bindings": {
+      "ctrl-[": "pane::ActivatePrevItem",
+      "ctrl-]": "pane::ActivateNextItem",
+      "ctrl-j": "terminal_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-shift-h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-shift-l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-shift-j": ["workspace::ActivatePaneInDirection", "Down"],
+      "ctrl-shift-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-[": "pane::ActivatePrevItem",
+      "ctrl-]": "pane::ActivateNextItem",
+      "ctrl-n": "workspace::NewTerminal",
+      "ctrl-j": "workspace::ToggleBottomDock",
+      "ctrl-w": "pane::CloseActiveItem"
+    }
+  },
+  {
+    "context": "Pane",
+    "bindings": {
+      "ctrl-k h": "pane::SplitLeft",
+      "ctrl-k l": "pane::SplitRight",
+      "ctrl-k j": "pane::SplitDown",
+      "ctrl-k k": "pane::SplitUp"
+    }
+  },
+  {
+    "context": "Picker || menu",
+    "bindings": {
+      "ctrl-k": "menu::SelectPrev",
+      "ctrl-j": "menu::SelectNext"
+    }
+  }
+]

@@ -1,0 +1,45 @@
+// Static tasks configuration.
+// https://zed.dev/docs/tasks
+[
+  {
+    "label": "Latex: build",
+    "command": "pdflatex",
+    "args": [
+      "--max-print-line=10000",
+      "-synctex=1",
+      "-interaction=nonstopmode",
+      "-file-line-error",
+      "-recorder",
+      "$ZED_FILENAME"
+    ],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "never",
+    "hide": "on_success",
+    "cwd": "$ZED_DIRNAME",
+    "tags": ["latex-build"],
+    "shell": {
+      "with_arguments": {
+        "program": "pwsh",
+        "args": ["-NoProfile", "chcp 65001"]
+      }
+    }
+  },
+  {
+    "label": "Latex: build latexmk",
+    "command": "latexmk",
+    "args": ["-synctex=1", "-pdf", "-recorder", "$ZED_FILENAME"],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "never",
+    "hide": "on_success",
+    "cwd": "$ZED_DIRNAME",
+    "tags": ["latex-build"],
+    "shell": {
+      "with_arguments": {
+        "program": "pwsh",
+        "args": ["-NoProfile"]
+      }
+    }
+  }
+]
