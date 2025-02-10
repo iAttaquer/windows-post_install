@@ -7,6 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "icon_theme": "Zed Icons Colored Theme",
   "features": {
     "inline_completion_provider": "supermaven"
   },
@@ -20,10 +21,23 @@
   "vim_mode": true,
   "ui_font_size": 13,
   "buffer_font_size": 13,
+  "relative_line_numbers": true,
   "theme": {
     "mode": "system",
     "light": "One Light",
     "dark": "Ayu Dark"
+  },
+  "gutter": {
+    "folds": true,
+    "code_actions": true,
+    "runnables": true
+  },
+  "experimental.theme_overrides": {
+    "players": [
+      {
+        "cursor": "#77FF00FF"
+      }
+    ]
   },
   "language_models": {
     "google": {
@@ -100,6 +114,15 @@
       "tab_size": 2,
       "preferred_line_length": 150,
       "format_on_save": "off"
+    },
+    "TypeScript": {
+      "language_servers": ["typescript-language-server", "!vtsls", "..."]
+    },
+    "TSX": {
+      "language_servers": ["typescript-language-server", "!vtsls", "..."]
+    },
+    "JavaScript": {
+      "language_servers": ["typescript-language-server", "!vtsls", "..."]
     }
   },
   "language_overrides": {
@@ -114,6 +137,10 @@
       "binary": {
         "path": "C:/CodeTools/omnisharp/OmniSharp.exe",
         "arguments": ["-lsp"]
+      },
+      "FormattingOptions": {
+        "TabSize": 2,
+        "IndentSize": 2
       }
     },
     "rust-analyzer": {
@@ -172,6 +199,7 @@
     }
   },
   "vim": {
-    "use_system_clipboard": "always"
+    "use_system_clipboard": "always",
+    "toggle_relative_line_numbers": true
   }
 }

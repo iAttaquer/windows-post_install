@@ -37,6 +37,7 @@
   {
     "context": "Editor",
     "bindings": {
+      // "j k": ["workspace::SendKeystrokes", "escape"]
       "ctrl-shift-l": ["workspace::ActivatePaneInDirection", "Right"],
       "ctrl-shift-j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-shift-k": ["workspace::ActivatePaneInDirection", "Up"],
